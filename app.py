@@ -93,12 +93,12 @@ LANG = {
         "title_math": "🧮 AI Math Solver",
         "title_physics": "⚛️ AI Physics Solver",
         "title_chemistry": "🧪 AI Chemistry Solver",
-        "title_english": "📝 AI English Solver",
+        "title_english": "📝 AI Academic Solver",  # <-- changed from "AI English Solver"
         "subtitle": "Select a subject, enter your problem, and AI will solve it with explanation.",
         "input_label_math": "📝 Type your math exercise here:",
         "input_label_physics": "⚛️ Type your physics problem here:",
         "input_label_chemistry": "🧪 Type your chemistry question here:",
-        "input_label_english": "📝 Type your English test request here:",
+        "input_label_english": "📝 Type your academic question here:",
         "resolve_btn": "✨ Solve",
         "clear_btn": "🗑️ Clear",
         "solution_title": "📖 Detailed Solution",
@@ -116,12 +116,12 @@ LANG = {
         "title_math": "🧮 Solveur Mathématique IA",
         "title_physics": "⚛️ Solveur Physique IA",
         "title_chemistry": "🧪 Solveur Chimie IA",
-        "title_english": "📝 Solveur Anglais IA",
+        "title_english": "📝 Solveur Académique IA",  # <-- changed from "Solveur Anglais IA"
         "subtitle": "Choisissez une matière, entrez votre problème, et l'IA le résoudra avec explication.",
         "input_label_math": "📝 Tapez votre exercice de maths ici :",
         "input_label_physics": "⚛️ Tapez votre problème de physique ici :",
         "input_label_chemistry": "🧪 Tapez votre question de chimie ici :",
-        "input_label_english": "📝 Tapez votre demande de test d'anglais ici :",
+        "input_label_english": "📝 Tapez votre question académique ici :",
         "resolve_btn": "✨ Résoudre",
         "clear_btn": "🗑️ Effacer",
         "solution_title": "📖 Solution détaillée",
@@ -139,12 +139,12 @@ LANG = {
         "title_math": "🧮 Solucionador Matemático IA",
         "title_physics": "⚛️ Solucionador Física IA",
         "title_chemistry": "🧪 Solucionador Química IA",
-        "title_english": "📝 Solucionador Inglés IA",
+        "title_english": "📝 Solucionador Académico IA",  # <-- changed from "Solucionador Inglés IA"
         "subtitle": "Selecciona una materia, ingresa tu problema, y la IA lo resolverá con explicación.",
         "input_label_math": "📝 Escribe tu ejercicio de matemáticas aquí:",
         "input_label_physics": "⚛️ Escribe tu problema de física aquí:",
         "input_label_chemistry": "🧪 Escribe tu pregunta de química aquí:",
-        "input_label_english": "📝 Escribe tu solicitud de prueba de inglés aquí:",
+        "input_label_english": "📝 Escribe tu pregunta académica aquí:",
         "resolve_btn": "✨ Resolver",
         "clear_btn": "🗑️ Borrar",
         "solution_title": "📖 Solución detallada",
@@ -281,16 +281,13 @@ subject_tabs = ["🧮 Math", "⚛️ Physics", "🧪 Chemistry", "📝 English"]
 subject_map = {0: "Math", 1: "Physics", 2: "Chemistry", 3: "English"}
 tabs = st.tabs(subject_tabs)
 
-# Loop through tabs – set subject when tab is clicked, but do NOT call st.rerun()
 for i, tab in enumerate(tabs):
     with tab:
         if st.session_state.subject != subject_map[i]:
             st.session_state.subject = subject_map[i]
-            # Clear previous results when switching subject
             st.session_state.exercise = ""
             st.session_state.solution = ""
             st.session_state.clean_steps = ""
-            # No st.rerun() – the page will naturally update
 
 # ---------- GET CURRENT SUBJECT ----------
 subject = st.session_state.subject
@@ -321,7 +318,6 @@ examples_key = {
 
 exercise = st.text_area(t(input_label_key), height=120, value=st.session_state.exercise, key="exercise_input")
 
-# Example button and hint
 col_ex1, col_ex2 = st.columns(2)
 with col_ex1:
     if st.button(f"📌 Load Example", key="example_btn"):
@@ -352,7 +348,6 @@ with col1:
                 with st.spinner("🧠 AI is thinking..."):
                     client = Groq(api_key=api_key)
                     lang = st.session_state.language
-                    # Build system prompt based on subject
                     system_prompt = {
                         "Math": {
                             "en": """You are a math tutor. Solve the exercise step by step.
@@ -487,7 +482,7 @@ with col1:
                             """
                         },
                         "English": {
-                            "en": """You are an English tutor. Generate a test or answer a question about English grammar, vocabulary, or reading comprehension.
+                            "en": """You are an academic tutor. Generate a test or answer a question about grammar, vocabulary, writing, or reading comprehension.
                             Provide two sections:
                             1. Detailed explanation of the answer or the test content with answers.
                             2. Clean list of answers or steps (numbered).
@@ -501,7 +496,7 @@ with col1:
                             ...
                             Final summary: [summary]
                             """,
-                            "fr": """Vous êtes un professeur d'anglais. Générez un test ou répondez à une question sur la grammaire, le vocabulaire ou la compréhension de lecture.
+                            "fr": """Vous êtes un tuteur académique. Générez un test ou répondez à une question sur la grammaire, le vocabulaire, l'écriture ou la compréhension de lecture.
                             Fournissez deux sections :
                             1. Explication détaillée de la réponse ou du contenu du test avec réponses.
                             2. Liste claire des réponses ou étapes (numérotées).
@@ -515,7 +510,7 @@ with col1:
                             ...
                             Résumé final : [résumé]
                             """,
-                            "es": """Eres un tutor de inglés. Genera un test o responde a una pregunta sobre gramática, vocabulario o comprensión de lectura.
+                            "es": """Eres un tutor académico. Genera un test o responde a una pregunta sobre gramática, vocabulario, escritura o comprensión de lectura.
                             Proporciona dos secciones:
                             1. Explicación detallada de la respuesta o del contenido del test con respuestas.
                             2. Lista clara de respuestas o pasos (numerados).
