@@ -90,7 +90,10 @@ if not st.session_state.authenticated:
 # ---------- LANGUAGE DICTIONARY ----------
 LANG = {
     "en": {
-        "title": "🧠 AI Subject Solver",
+        "title_math": "🧮 AI Math Solver",
+        "title_physics": "⚛️ AI Physics Solver",
+        "title_chemistry": "🧪 AI Chemistry Solver",
+        "title_english": "📝 AI English Solver",
         "subtitle": "Select a subject, enter your problem, and AI will solve it with explanation.",
         "input_label_math": "📝 Type your math exercise here:",
         "input_label_physics": "⚛️ Type your physics problem here:",
@@ -110,7 +113,10 @@ LANG = {
         "examples_english": "Try: Generate a grammar test with 5 questions on tenses."
     },
     "fr": {
-        "title": "🧠 Solveur IA Multidisciplinaire",
+        "title_math": "🧮 Solveur Mathématique IA",
+        "title_physics": "⚛️ Solveur Physique IA",
+        "title_chemistry": "🧪 Solveur Chimie IA",
+        "title_english": "📝 Solveur Anglais IA",
         "subtitle": "Choisissez une matière, entrez votre problème, et l'IA le résoudra avec explication.",
         "input_label_math": "📝 Tapez votre exercice de maths ici :",
         "input_label_physics": "⚛️ Tapez votre problème de physique ici :",
@@ -130,7 +136,10 @@ LANG = {
         "examples_english": "Essayez : Générez un test de grammaire avec 5 questions sur les temps."
     },
     "es": {
-        "title": "🧠 Solucionador IA Multidisciplinar",
+        "title_math": "🧮 Solucionador Matemático IA",
+        "title_physics": "⚛️ Solucionador Física IA",
+        "title_chemistry": "🧪 Solucionador Química IA",
+        "title_english": "📝 Solucionador Inglés IA",
         "subtitle": "Selecciona una materia, ingresa tu problema, y la IA lo resolverá con explicación.",
         "input_label_math": "📝 Escribe tu ejercicio de matemáticas aquí:",
         "input_label_physics": "⚛️ Escribe tu problema de física aquí:",
@@ -274,45 +283,47 @@ tabs = st.tabs(subject_tabs)
 
 for i, tab in enumerate(tabs):
     with tab:
-        # Update subject when tab is clicked
         if st.session_state.subject != subject_map[i]:
             st.session_state.subject = subject_map[i]
             # Clear previous results when switching subject
             st.session_state.exercise = ""
             st.session_state.solution = ""
             st.session_state.clean_steps = ""
-            # No st.rerun() – Streamlit handles the refresh
+            st.rerun()  # Force immediate update of the title and content
 
-# Get current subject
+# ---------- GET CURRENT SUBJECT ----------
 subject = st.session_state.subject
-subject_icons = {"Math": "🧮", "Physics": "⚛️", "Chemistry": "🧪", "English": "📝"}
 
-# ---------- MAIN CONTENT ----------
-st.title(f"{subject_icons[subject]} AI {subject} Solver")
+# ---------- DYNAMIC TITLE ----------
+subject_title_key = {
+    "Math": "title_math",
+    "Physics": "title_physics",
+    "Chemistry": "title_chemistry",
+    "English": "title_english"
+}
+st.title(t(subject_title_key[subject]))
 st.caption(t("subtitle"))
 
-# Input label and examples
-input_label = {
-    "Math": t("input_label_math"),
-    "Physics": t("input_label_physics"),
-    "Chemistry": t("input_label_chemistry"),
-    "English": t("input_label_english")
+# ---------- INPUT LABEL & EXAMPLES ----------
+input_label_key = {
+    "Math": "input_label_math",
+    "Physics": "input_label_physics",
+    "Chemistry": "input_label_chemistry",
+    "English": "input_label_english"
+}[subject]
+examples_key = {
+    "Math": "examples_math",
+    "Physics": "examples_physics",
+    "Chemistry": "examples_chemistry",
+    "English": "examples_english"
 }[subject]
 
-examples = {
-    "Math": t("examples_math"),
-    "Physics": t("examples_physics"),
-    "Chemistry": t("examples_chemistry"),
-    "English": t("examples_english")
-}
+exercise = st.text_area(t(input_label_key), height=120, value=st.session_state.exercise, key="exercise_input")
 
-# Input area
-exercise = st.text_area(input_label, height=120, value=st.session_state.exercise, key="exercise_input")
-
-# Example buttons
+# Example button and hint
 col_ex1, col_ex2 = st.columns(2)
 with col_ex1:
-    if st.button(f"📌 Load Example", key="example_btn", help=f"Load an example for {subject}"):
+    if st.button(f"📌 Load Example", key="example_btn"):
         example_map = {
             "Math": "3x + 7 = 22",
             "Physics": "A car accelerates from rest at 2 m/s² for 5 seconds. How far does it travel?",
@@ -324,8 +335,9 @@ with col_ex1:
         st.session_state.clean_steps = ""
         st.rerun()
 with col_ex2:
-    st.caption(f"💡 {examples[subject]}")
+    st.caption(f"💡 {t(examples_key)}")
 
+# ---------- BUTTONS ----------
 col1, col2, col3 = st.columns([1, 1, 4])
 with col1:
     if st.button(t("resolve_btn"), use_container_width=True):
@@ -563,22 +575,20 @@ with col2:
         st.session_state.clean_steps = ""
         st.rerun()
 
-# Display exercise on board
+# ---------- DISPLAY BOARD ----------
 st.markdown("---")
 st.subheader(t("board_exercise"))
 st.markdown(f'<div class="board">{exercise if exercise else "📝 Your problem will appear here..."}</div>', unsafe_allow_html=True)
 
-# Display detailed solution
+# ---------- DISPLAY SOLUTION ----------
 if st.session_state.solution:
     st.subheader(t("solution_title"))
     st.markdown(f'<div class="solution-box">{st.session_state.solution}</div>', unsafe_allow_html=True)
 
-    # Display clean steps if available
     if st.session_state.clean_steps and st.session_state.clean_steps != "No clean steps extracted.":
         st.subheader(t("clean_steps_title"))
         st.markdown(f'<div class="clean-steps-box">{st.session_state.clean_steps}</div>', unsafe_allow_html=True)
 
-    # Voice explanation
     if st.button("🔊 Listen to Explanation", key="voice_btn"):
         with st.spinner("🔊 Generating voice..."):
             final_msg = t("final_message")
