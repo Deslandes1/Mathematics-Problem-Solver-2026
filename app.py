@@ -25,6 +25,8 @@ if "exercise" not in st.session_state:
     st.session_state.exercise = ""
 if "solution" not in st.session_state:
     st.session_state.solution = ""
+if "clean_steps" not in st.session_state:
+    st.session_state.clean_steps = ""
 
 def login():
     st.markdown(
@@ -92,6 +94,7 @@ LANG = {
         "resolve_btn": "✨ AI Resolve",
         "clear_btn": "🗑️ Clear",
         "solution_title": "📖 Step‑by‑Step Solution",
+        "clean_steps_title": "📋 Clean Steps (numbered)",
         "board_exercise": "📝 Exercise",
         "final_message": "This Mathematics Exercise resolved software was built by Gesner Deslandes, Engineer in Chief at GlobalInternet.py.",
         "error_api": "Groq API key not set. Please add GROQ_API_KEY in secrets.",
@@ -104,6 +107,7 @@ LANG = {
         "resolve_btn": "✨ Résoudre avec IA",
         "clear_btn": "🗑️ Effacer",
         "solution_title": "📖 Solution étape par étape",
+        "clean_steps_title": "📋 Étapes claires (numérotées)",
         "board_exercise": "📝 Exercice",
         "final_message": "Ce logiciel de résolution d'exercices mathématiques a été construit par Gesner Deslandes, Ingénieur en chef chez GlobalInternet.py.",
         "error_api": "Clé API Groq non définie. Ajoutez GROQ_API_KEY dans les secrets.",
@@ -116,6 +120,7 @@ LANG = {
         "resolve_btn": "✨ Resolver con IA",
         "clear_btn": "🗑️ Borrar",
         "solution_title": "📖 Solución paso a paso",
+        "clean_steps_title": "📋 Pasos claros (numerados)",
         "board_exercise": "📝 Ejercicio",
         "final_message": "Este software de resolución de ejercicios matemáticos fue construido por Gesner Deslandes, Ingeniero Jefe en GlobalInternet.py.",
         "error_api": "Clave API de Groq no configurada. Agrega GROQ_API_KEY en los secretos.",
@@ -194,6 +199,18 @@ st.markdown(
         word-wrap: break-word;
         border-left: 8px solid #ffd700;
     }
+    .clean-steps-box {
+        background: #1b5e20;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 15px 0;
+        color: #ffffff;
+        font-size: 1.1rem;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        border-left: 8px solid #00ff88;
+    }
     .stTextArea textarea {
         border: 2px solid #1a5276 !important;
         border-radius: 20px !important;
@@ -241,9 +258,48 @@ with col1:
                     client = Groq(api_key=api_key)
                     lang = st.session_state.language
                     system_prompt = {
-                        "en": "You are a math tutor. Solve the exercise step by step in a clear, friendly manner. Break it down into logical steps and show the final answer. Use plain text.",
-                        "fr": "Vous êtes un professeur de mathématiques. Résolvez l'exercice étape par étape de manière claire et amicale. Décomposez en étapes logiques et montrez la réponse finale. Utilisez du texte simple.",
-                        "es": "Eres un tutor de matemáticas. Resuelve el ejercicio paso a paso de manera clara y amigable. Desglosa en pasos lógicos y muestra la respuesta final. Usa texto simple."
+                        "en": """You are a math tutor. Solve the exercise step by step.
+                        Provide two sections:
+                        1. Detailed explanation with friendly text (as before).
+                        2. Clean numbered steps with only equations and operations, no extra words, each step on a new line starting with the step number.
+
+                        Format:
+                        ---EXPLANATION---
+                        [detailed explanation]
+                        ---CLEAN_STEPS---
+                        1. [equation/operation]
+                        2. [equation/operation]
+                        ...
+                        Final answer: [answer]
+                        """,
+                        "fr": """Vous êtes un professeur de mathématiques. Résolvez l'exercice étape par étape.
+                        Fournissez deux sections :
+                        1. Explication détaillée avec texte amical.
+                        2. Étapes claires numérotées avec uniquement les équations et opérations, sans mots supplémentaires, chaque étape sur une nouvelle ligne commençant par le numéro.
+
+                        Format :
+                        ---EXPLANATION---
+                        [explication détaillée]
+                        ---CLEAN_STEPS---
+                        1. [équation/opération]
+                        2. [équation/opération]
+                        ...
+                        Réponse finale : [réponse]
+                        """,
+                        "es": """Eres un tutor de matemáticas. Resuelve el ejercicio paso a paso.
+                        Proporciona dos secciones:
+                        1. Explicación detallada con texto amigable.
+                        2. Pasos claros numerados con solo ecuaciones y operaciones, sin palabras adicionales, cada paso en una nueva línea comenzando con el número.
+
+                        Formato:
+                        ---EXPLANATION---
+                        [explicación detallada]
+                        ---CLEAN_STEPS---
+                        1. [ecuación/operación]
+                        2. [ecuación/operación]
+                        ...
+                        Respuesta final: [respuesta]
+                        """
                     }[lang]
                     prompt = f"{system_prompt}\n\nExercise: {exercise}\n\nSolution:"
                     try:
@@ -253,8 +309,33 @@ with col1:
                             temperature=0.3,
                             max_tokens=1024
                         )
-                        solution_text = response.choices[0].message.content
-                        st.session_state.solution = solution_text
+                        full_response = response.choices[0].message.content
+
+                        # Parse the response to separate explanation and clean steps
+                        explanation = ""
+                        clean_steps = ""
+                        if "---EXPLANATION---" in full_response and "---CLEAN_STEPS---" in full_response:
+                            parts = full_response.split("---CLEAN_STEPS---")
+                            explanation_part = parts[0].replace("---EXPLANATION---", "").strip()
+                            clean_part = parts[1].strip()
+                            explanation = explanation_part
+                            clean_steps = clean_part
+                        else:
+                            # Fallback: treat the whole response as explanation and try to extract steps
+                            explanation = full_response
+                            # Try to find numbered steps in the response
+                            lines = full_response.split('\n')
+                            step_lines = []
+                            for line in lines:
+                                if re.match(r'^\d+\.', line.strip()):
+                                    step_lines.append(line.strip())
+                            if step_lines:
+                                clean_steps = "\n".join(step_lines)
+                            else:
+                                clean_steps = "No clean steps extracted."
+
+                        st.session_state.solution = explanation
+                        st.session_state.clean_steps = clean_steps
                         st.session_state.exercise = exercise
                         st.rerun()
                     except Exception as e:
@@ -264,6 +345,7 @@ with col2:
     if st.button(t("clear_btn"), use_container_width=True):
         st.session_state.exercise = ""
         st.session_state.solution = ""
+        st.session_state.clean_steps = ""
         st.rerun()
 
 # Display exercise on board
@@ -271,10 +353,15 @@ st.markdown("---")
 st.subheader(t("board_exercise"))
 st.markdown(f'<div class="board">{exercise if exercise else "📝 Your exercise will appear here..."}</div>', unsafe_allow_html=True)
 
-# Display solution
+# Display detailed solution
 if st.session_state.solution:
     st.subheader(t("solution_title"))
     st.markdown(f'<div class="solution-box">{st.session_state.solution}</div>', unsafe_allow_html=True)
+
+    # Display clean steps (new)
+    if st.session_state.clean_steps:
+        st.subheader(t("clean_steps_title"))
+        st.markdown(f'<div class="clean-steps-box">{st.session_state.clean_steps}</div>', unsafe_allow_html=True)
 
     # Voice explanation
     if st.button("🔊 Listen to Explanation", key="voice_btn"):
