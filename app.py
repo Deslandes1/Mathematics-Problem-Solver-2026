@@ -131,7 +131,7 @@ with st.sidebar:
     st.markdown(
         """
         <div style="text-align:center; padding:10px;">
-            <img src="https://github.com/Deslandes1/DocumentAIFillOut-2026/blob/main/Gesner%20Deslandes%202026.png?raw=true" 
+            <img src="https://raw.githubusercontent.com/Deslandes1/Mathematics-Problem-Solver-2026/main/Gesner%20Deslandes.JPG" 
                  style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #1a5276; margin-bottom:5px;">
             <h3 style="color:#1a5276; margin:0;">Gesner Deslandes</h3>
             <p style="color:#2c3e50; font-weight:bold; margin:0;">Engineer in Chief</p>
