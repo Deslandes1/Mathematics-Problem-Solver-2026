@@ -8,8 +8,8 @@ from groq import Groq
 
 # ---------- PAGE CONFIG ----------
 st.set_page_config(
-    page_title="AI Math Solver",
-    page_icon="🧮",
+    page_title="AI Subject Solver",
+    page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -27,6 +27,8 @@ if "solution" not in st.session_state:
     st.session_state.solution = ""
 if "clean_steps" not in st.session_state:
     st.session_state.clean_steps = ""
+if "subject" not in st.session_state:
+    st.session_state.subject = "Math"
 
 def login():
     st.markdown(
@@ -65,7 +67,7 @@ def login():
         }
         </style>
         <div class="login-box">
-            <h2>🔐 AI Math Solver</h2>
+            <h2>🔐 AI Subject Solver</h2>
             <p style="color: #ddd;">Enter the password to continue</p>
         </div>
         """,
@@ -88,43 +90,64 @@ if not st.session_state.authenticated:
 # ---------- LANGUAGE DICTIONARY ----------
 LANG = {
     "en": {
-        "title": "🧮 AI Math Solver",
-        "subtitle": "Write any math exercise, and AI will solve it step by step with voice explanation.",
-        "input_label": "📝 Type your math exercise here:",
-        "resolve_btn": "✨ AI Resolve",
+        "title": "🧠 AI Subject Solver",
+        "subtitle": "Select a subject, enter your problem, and AI will solve it with explanation.",
+        "input_label_math": "📝 Type your math exercise here:",
+        "input_label_physics": "⚛️ Type your physics problem here:",
+        "input_label_chemistry": "🧪 Type your chemistry question here:",
+        "input_label_english": "📝 Type your English test request here:",
+        "resolve_btn": "✨ Solve",
         "clear_btn": "🗑️ Clear",
-        "solution_title": "📖 Step‑by‑Step Solution",
-        "clean_steps_title": "📋 Clean Steps (numbered)",
-        "board_exercise": "📝 Exercise",
-        "final_message": "This Mathematics Exercise resolved software was built by Gesner Deslandes, Engineer in Chief at GlobalInternet.py.",
+        "solution_title": "📖 Detailed Solution",
+        "clean_steps_title": "📋 Step‑by‑Step (numbered)",
+        "board_exercise": "📝 Problem",
+        "final_message": "This software was built by Gesner Deslandes, Engineer in Chief at GlobalInternet.py.",
         "error_api": "Groq API key not set. Please add GROQ_API_KEY in secrets.",
-        "error_empty": "Please type a math exercise first."
+        "error_empty": "Please type a problem first.",
+        "examples_math": "Try: 3x + 7 = 22",
+        "examples_physics": "Try: A car accelerates from rest at 2 m/s² for 5 seconds. How far does it travel?",
+        "examples_chemistry": "Try: Balance the equation: Fe + O₂ → Fe₂O₃",
+        "examples_english": "Try: Generate a grammar test with 5 questions on tenses."
     },
     "fr": {
-        "title": "🧮 Solveur Mathématique IA",
-        "subtitle": "Écrivez n'importe quel exercice de maths, l'IA le résoudra étape par étape avec explication vocale.",
-        "input_label": "📝 Tapez votre exercice de maths ici :",
-        "resolve_btn": "✨ Résoudre avec IA",
+        "title": "🧠 Solveur IA Multidisciplinaire",
+        "subtitle": "Choisissez une matière, entrez votre problème, et l'IA le résoudra avec explication.",
+        "input_label_math": "📝 Tapez votre exercice de maths ici :",
+        "input_label_physics": "⚛️ Tapez votre problème de physique ici :",
+        "input_label_chemistry": "🧪 Tapez votre question de chimie ici :",
+        "input_label_english": "📝 Tapez votre demande de test d'anglais ici :",
+        "resolve_btn": "✨ Résoudre",
         "clear_btn": "🗑️ Effacer",
-        "solution_title": "📖 Solution étape par étape",
-        "clean_steps_title": "📋 Étapes claires (numérotées)",
-        "board_exercise": "📝 Exercice",
-        "final_message": "Ce logiciel de résolution d'exercices mathématiques a été construit par Gesner Deslandes, Ingénieur en chef chez GlobalInternet.py.",
+        "solution_title": "📖 Solution détaillée",
+        "clean_steps_title": "📋 Étapes numérotées",
+        "board_exercise": "📝 Problème",
+        "final_message": "Ce logiciel a été construit par Gesner Deslandes, Ingénieur en chef chez GlobalInternet.py.",
         "error_api": "Clé API Groq non définie. Ajoutez GROQ_API_KEY dans les secrets.",
-        "error_empty": "Veuillez d'abord taper un exercice de maths."
+        "error_empty": "Veuillez d'abord taper un problème.",
+        "examples_math": "Essayez : 3x + 7 = 22",
+        "examples_physics": "Essayez : Une voiture accélère de 0 à 2 m/s² pendant 5 secondes. Quelle distance parcourt-elle ?",
+        "examples_chemistry": "Essayez : Équilibrer l'équation : Fe + O₂ → Fe₂O₃",
+        "examples_english": "Essayez : Générez un test de grammaire avec 5 questions sur les temps."
     },
     "es": {
-        "title": "🧮 Solucionador Matemático IA",
-        "subtitle": "Escribe cualquier ejercicio de matemáticas, la IA lo resolverá paso a paso con explicación de voz.",
-        "input_label": "📝 Escribe tu ejercicio de matemáticas aquí:",
-        "resolve_btn": "✨ Resolver con IA",
+        "title": "🧠 Solucionador IA Multidisciplinar",
+        "subtitle": "Selecciona una materia, ingresa tu problema, y la IA lo resolverá con explicación.",
+        "input_label_math": "📝 Escribe tu ejercicio de matemáticas aquí:",
+        "input_label_physics": "⚛️ Escribe tu problema de física aquí:",
+        "input_label_chemistry": "🧪 Escribe tu pregunta de química aquí:",
+        "input_label_english": "📝 Escribe tu solicitud de prueba de inglés aquí:",
+        "resolve_btn": "✨ Resolver",
         "clear_btn": "🗑️ Borrar",
-        "solution_title": "📖 Solución paso a paso",
-        "clean_steps_title": "📋 Pasos claros (numerados)",
-        "board_exercise": "📝 Ejercicio",
-        "final_message": "Este software de resolución de ejercicios matemáticos fue construido por Gesner Deslandes, Ingeniero Jefe en GlobalInternet.py.",
+        "solution_title": "📖 Solución detallada",
+        "clean_steps_title": "📋 Pasos numerados",
+        "board_exercise": "📝 Problema",
+        "final_message": "Este software fue construido por Gesner Deslandes, Ingeniero Jefe en GlobalInternet.py.",
         "error_api": "Clave API de Groq no configurada. Agrega GROQ_API_KEY en los secretos.",
-        "error_empty": "Primero escribe un ejercicio de matemáticas."
+        "error_empty": "Primero escribe un problema.",
+        "examples_math": "Prueba: 3x + 7 = 22",
+        "examples_physics": "Prueba: Un coche acelera desde el reposo a 2 m/s² durante 5 segundos. ¿Qué distancia recorre?",
+        "examples_chemistry": "Prueba: Balancea la ecuación: Fe + O₂ → Fe₂O₃",
+        "examples_english": "Prueba: Genera un test de gramática con 5 preguntas sobre tiempos verbales."
     }
 }
 
@@ -168,7 +191,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background: #d4e6f1; /* light blue */
+        background: #d4e6f1;
     }
     .board {
         background: #2e7d32;
@@ -231,17 +254,89 @@ st.markdown(
         transform: scale(1.02);
         box-shadow: 0 8px 20px rgba(26, 82, 118, 0.3);
     }
+    .example-btn button {
+        background-color: #2e86c1;
+        font-size: 0.8rem;
+        padding: 0.2rem 1rem;
+    }
+    .example-btn button:hover {
+        background-color: #1a5276;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+# ---------- SUBJECT SELECTION ----------
+subject_tabs = ["🧮 Math", "⚛️ Physics", "🧪 Chemistry", "📝 English"]
+subject_keys = ["Math", "Physics", "Chemistry", "English"]
+subject_icons = ["🧮", "⚛️", "🧪", "📝"]
+selected_tab = st.tabs(subject_tabs)
+# Map tab index to subject key
+subject_map = {0: "Math", 1: "Physics", 2: "Chemistry", 3: "English"}
+
+# We'll use a placeholder container to hold the dynamic content
+# But we can't easily switch tabs with state, so we'll use st.session_state.subject
+
+# We'll put the tab selection in the main area and store the selected subject
+selected_subject = None
+for i, tab in enumerate(selected_tab):
+    with tab:
+        selected_subject = subject_map[i]
+        if st.session_state.subject != selected_subject:
+            st.session_state.subject = selected_subject
+            # Clear previous results when switching subject
+            st.session_state.exercise = ""
+            st.session_state.solution = ""
+            st.session_state.clean_steps = ""
+            st.rerun()
+
+# If no subject selected (initial load), default to Math
+if "subject" not in st.session_state:
+    st.session_state.subject = "Math"
+
+# Now we render the main solver based on st.session_state.subject
+subject = st.session_state.subject
+
 # ---------- MAIN PAGE ----------
-st.title(t("title"))
+st.title(f"{subject_icons[subject_keys.index(subject)]} AI {subject} Solver")
 st.caption(t("subtitle"))
 
+# Get the appropriate input label
+input_label = {
+    "Math": t("input_label_math"),
+    "Physics": t("input_label_physics"),
+    "Chemistry": t("input_label_chemistry"),
+    "English": t("input_label_english")
+}[subject]
+
+# Examples
+examples = {
+    "Math": t("examples_math"),
+    "Physics": t("examples_physics"),
+    "Chemistry": t("examples_chemistry"),
+    "English": t("examples_english")
+}
+
 # Input area
-exercise = st.text_area(t("input_label"), height=120, value=st.session_state.exercise, key="exercise_input")
+exercise = st.text_area(input_label, height=120, value=st.session_state.exercise, key="exercise_input")
+
+# Example buttons
+col_ex1, col_ex2 = st.columns(2)
+with col_ex1:
+    if st.button(f"📌 Example", key="example_btn", help=f"Load an example for {subject}"):
+        example_map = {
+            "Math": "3x + 7 = 22",
+            "Physics": "A car accelerates from rest at 2 m/s² for 5 seconds. How far does it travel?",
+            "Chemistry": "Balance the equation: Fe + O₂ → Fe₂O₃",
+            "English": "Generate a grammar test with 5 questions on tenses."
+        }
+        st.session_state.exercise = example_map[subject]
+        st.session_state.solution = ""
+        st.session_state.clean_steps = ""
+        st.rerun()
+with col_ex2:
+    st.caption(f"💡 {examples[subject]}")
 
 col1, col2, col3 = st.columns([1, 1, 4])
 with col1:
@@ -249,7 +344,6 @@ with col1:
         if not exercise.strip():
             st.warning(t("error_empty"))
         else:
-            # Call Groq AI
             api_key = st.secrets.get("GROQ_API_KEY")
             if not api_key:
                 st.error(t("error_api"))
@@ -257,51 +351,187 @@ with col1:
                 with st.spinner("🧠 AI is thinking..."):
                     client = Groq(api_key=api_key)
                     lang = st.session_state.language
+                    # Build system prompt based on subject
                     system_prompt = {
-                        "en": """You are a math tutor. Solve the exercise step by step.
-                        Provide two sections:
-                        1. Detailed explanation with friendly text (as before).
-                        2. Clean numbered steps with only equations and operations, no extra words, each step on a new line starting with the step number.
+                        "Math": {
+                            "en": """You are a math tutor. Solve the exercise step by step.
+                            Provide two sections:
+                            1. Detailed explanation with friendly text.
+                            2. Clean numbered steps with only equations and operations, no extra words, each step on a new line starting with the step number.
 
-                        Format:
-                        ---EXPLANATION---
-                        [detailed explanation]
-                        ---CLEAN_STEPS---
-                        1. [equation/operation]
-                        2. [equation/operation]
-                        ...
-                        Final answer: [answer]
-                        """,
-                        "fr": """Vous êtes un professeur de mathématiques. Résolvez l'exercice étape par étape.
-                        Fournissez deux sections :
-                        1. Explication détaillée avec texte amical.
-                        2. Étapes claires numérotées avec uniquement les équations et opérations, sans mots supplémentaires, chaque étape sur une nouvelle ligne commençant par le numéro.
+                            Format:
+                            ---EXPLANATION---
+                            [detailed explanation]
+                            ---CLEAN_STEPS---
+                            1. [equation/operation]
+                            2. [equation/operation]
+                            ...
+                            Final answer: [answer]
+                            """,
+                            "fr": """Vous êtes un professeur de mathématiques. Résolvez l'exercice étape par étape.
+                            Fournissez deux sections :
+                            1. Explication détaillée avec texte amical.
+                            2. Étapes claires numérotées avec uniquement les équations et opérations, sans mots supplémentaires, chaque étape sur une nouvelle ligne commençant par le numéro.
 
-                        Format :
-                        ---EXPLANATION---
-                        [explication détaillée]
-                        ---CLEAN_STEPS---
-                        1. [équation/opération]
-                        2. [équation/opération]
-                        ...
-                        Réponse finale : [réponse]
-                        """,
-                        "es": """Eres un tutor de matemáticas. Resuelve el ejercicio paso a paso.
-                        Proporciona dos secciones:
-                        1. Explicación detallada con texto amigable.
-                        2. Pasos claros numerados con solo ecuaciones y operaciones, sin palabras adicionales, cada paso en una nueva línea comenzando con el número.
+                            Format :
+                            ---EXPLANATION---
+                            [explication détaillée]
+                            ---CLEAN_STEPS---
+                            1. [équation/opération]
+                            2. [équation/opération]
+                            ...
+                            Réponse finale : [réponse]
+                            """,
+                            "es": """Eres un tutor de matemáticas. Resuelve el ejercicio paso a paso.
+                            Proporciona dos secciones:
+                            1. Explicación detallada con texto amigable.
+                            2. Pasos claros numerados con solo ecuaciones y operaciones, sin palabras adicionales, cada paso en una nueva línea comenzando con el número.
 
-                        Formato:
-                        ---EXPLANATION---
-                        [explicación detallada]
-                        ---CLEAN_STEPS---
-                        1. [ecuación/operación]
-                        2. [ecuación/operación]
-                        ...
-                        Respuesta final: [respuesta]
-                        """
-                    }[lang]
-                    prompt = f"{system_prompt}\n\nExercise: {exercise}\n\nSolution:"
+                            Formato:
+                            ---EXPLANATION---
+                            [explicación detallada]
+                            ---CLEAN_STEPS---
+                            1. [ecuación/operación]
+                            2. [ecuación/operación]
+                            ...
+                            Respuesta final: [respuesta]
+                            """
+                        },
+                        "Physics": {
+                            "en": """You are a physics tutor. Solve the physics problem step by step.
+                            Provide two sections:
+                            1. Detailed explanation with formulas and reasoning.
+                            2. Clean numbered steps with only equations and final result.
+
+                            Format:
+                            ---EXPLANATION---
+                            [detailed explanation]
+                            ---CLEAN_STEPS---
+                            1. [equation/operation]
+                            2. [equation/operation]
+                            ...
+                            Final answer: [answer]
+                            """,
+                            "fr": """Vous êtes un professeur de physique. Résolvez le problème de physique étape par étape.
+                            Fournissez deux sections :
+                            1. Explication détaillée avec formules et raisonnement.
+                            2. Étapes claires numérotées avec uniquement les équations et le résultat final.
+
+                            Format :
+                            ---EXPLANATION---
+                            [explication détaillée]
+                            ---CLEAN_STEPS---
+                            1. [équation/opération]
+                            2. [équation/opération]
+                            ...
+                            Réponse finale : [réponse]
+                            """,
+                            "es": """Eres un tutor de física. Resuelve el problema de física paso a paso.
+                            Proporciona dos secciones:
+                            1. Explicación detallada con fórmulas y razonamiento.
+                            2. Pasos claros numerados con solo ecuaciones y resultado final.
+
+                            Formato:
+                            ---EXPLANATION---
+                            [explicación detallada]
+                            ---CLEAN_STEPS---
+                            1. [ecuación/operación]
+                            2. [ecuación/operación]
+                            ...
+                            Respuesta final: [respuesta]
+                            """
+                        },
+                        "Chemistry": {
+                            "en": """You are a chemistry tutor. Solve the chemistry problem step by step.
+                            Provide two sections:
+                            1. Detailed explanation with chemical equations and reasoning.
+                            2. Clean numbered steps with only equations and final result.
+
+                            Format:
+                            ---EXPLANATION---
+                            [detailed explanation]
+                            ---CLEAN_STEPS---
+                            1. [equation/operation]
+                            2. [equation/operation]
+                            ...
+                            Final answer: [answer]
+                            """,
+                            "fr": """Vous êtes un professeur de chimie. Résolvez le problème de chimie étape par étape.
+                            Fournissez deux sections :
+                            1. Explication détaillée avec équations chimiques et raisonnement.
+                            2. Étapes claires numérotées avec uniquement les équations et le résultat final.
+
+                            Format :
+                            ---EXPLANATION---
+                            [explication détaillée]
+                            ---CLEAN_STEPS---
+                            1. [équation/opération]
+                            2. [équation/opération]
+                            ...
+                            Réponse finale : [réponse]
+                            """,
+                            "es": """Eres un tutor de química. Resuelve el problema de química paso a paso.
+                            Proporciona dos secciones:
+                            1. Explicación detallada con ecuaciones químicas y razonamiento.
+                            2. Pasos claros numerados con solo ecuaciones y resultado final.
+
+                            Formato:
+                            ---EXPLANATION---
+                            [explicación detallada]
+                            ---CLEAN_STEPS---
+                            1. [ecuación/operación]
+                            2. [ecuación/operación]
+                            ...
+                            Respuesta final: [respuesta]
+                            """
+                        },
+                        "English": {
+                            "en": """You are an English tutor. Generate a test or answer a question about English grammar, vocabulary, or reading comprehension.
+                            Provide two sections:
+                            1. Detailed explanation of the answer or the test content with answers.
+                            2. Clean list of answers or steps (numbered).
+
+                            Format:
+                            ---EXPLANATION---
+                            [detailed explanation]
+                            ---CLEAN_STEPS---
+                            1. [answer 1]
+                            2. [answer 2]
+                            ...
+                            Final summary: [summary]
+                            """,
+                            "fr": """Vous êtes un professeur d'anglais. Générez un test ou répondez à une question sur la grammaire, le vocabulaire ou la compréhension de lecture.
+                            Fournissez deux sections :
+                            1. Explication détaillée de la réponse ou du contenu du test avec réponses.
+                            2. Liste claire des réponses ou étapes (numérotées).
+
+                            Format :
+                            ---EXPLANATION---
+                            [explication détaillée]
+                            ---CLEAN_STEPS---
+                            1. [réponse 1]
+                            2. [réponse 2]
+                            ...
+                            Résumé final : [résumé]
+                            """,
+                            "es": """Eres un tutor de inglés. Genera un test o responde a una pregunta sobre gramática, vocabulario o comprensión de lectura.
+                            Proporciona dos secciones:
+                            1. Explicación detallada de la respuesta o del contenido del test con respuestas.
+                            2. Lista clara de respuestas o pasos (numerados).
+
+                            Formato:
+                            ---EXPLANATION---
+                            [explicación detallada]
+                            ---CLEAN_STEPS---
+                            1. [respuesta 1]
+                            2. [respuesta 2]
+                            ...
+                            Resumen final: [resumen]
+                            """
+                        }
+                    }[subject][lang]
+
+                    prompt = f"{system_prompt}\n\nProblem: {exercise}\n\nSolution:"
                     try:
                         response = client.chat.completions.create(
                             model="llama-3.1-8b-instant",
@@ -311,7 +541,6 @@ with col1:
                         )
                         full_response = response.choices[0].message.content
 
-                        # Parse the response to separate explanation and clean steps
                         explanation = ""
                         clean_steps = ""
                         if "---EXPLANATION---" in full_response and "---CLEAN_STEPS---" in full_response:
@@ -321,9 +550,7 @@ with col1:
                             explanation = explanation_part
                             clean_steps = clean_part
                         else:
-                            # Fallback: treat the whole response as explanation and try to extract steps
                             explanation = full_response
-                            # Try to find numbered steps in the response
                             lines = full_response.split('\n')
                             step_lines = []
                             for line in lines:
@@ -351,22 +578,21 @@ with col2:
 # Display exercise on board
 st.markdown("---")
 st.subheader(t("board_exercise"))
-st.markdown(f'<div class="board">{exercise if exercise else "📝 Your exercise will appear here..."}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="board">{exercise if exercise else "📝 Your problem will appear here..."}</div>', unsafe_allow_html=True)
 
 # Display detailed solution
 if st.session_state.solution:
     st.subheader(t("solution_title"))
     st.markdown(f'<div class="solution-box">{st.session_state.solution}</div>', unsafe_allow_html=True)
 
-    # Display clean steps (new)
-    if st.session_state.clean_steps:
+    # Display clean steps if available
+    if st.session_state.clean_steps and st.session_state.clean_steps != "No clean steps extracted.":
         st.subheader(t("clean_steps_title"))
         st.markdown(f'<div class="clean-steps-box">{st.session_state.clean_steps}</div>', unsafe_allow_html=True)
 
     # Voice explanation
     if st.button("🔊 Listen to Explanation", key="voice_btn"):
         with st.spinner("🔊 Generating voice..."):
-            # Combine solution + final message
             final_msg = t("final_message")
             full_text = f"{st.session_state.solution}\n\n{final_msg}"
             lang_code = st.session_state.language
