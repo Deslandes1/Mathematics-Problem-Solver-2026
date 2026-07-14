@@ -267,42 +267,31 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------- SUBJECT SELECTION ----------
+# ---------- SUBJECT SELECTION (TABS) ----------
 subject_tabs = ["🧮 Math", "⚛️ Physics", "🧪 Chemistry", "📝 English"]
-subject_keys = ["Math", "Physics", "Chemistry", "English"]
-subject_icons = ["🧮", "⚛️", "🧪", "📝"]
-selected_tab = st.tabs(subject_tabs)
-# Map tab index to subject key
 subject_map = {0: "Math", 1: "Physics", 2: "Chemistry", 3: "English"}
+tabs = st.tabs(subject_tabs)
 
-# We'll use a placeholder container to hold the dynamic content
-# But we can't easily switch tabs with state, so we'll use st.session_state.subject
-
-# We'll put the tab selection in the main area and store the selected subject
-selected_subject = None
-for i, tab in enumerate(selected_tab):
+for i, tab in enumerate(tabs):
     with tab:
-        selected_subject = subject_map[i]
-        if st.session_state.subject != selected_subject:
-            st.session_state.subject = selected_subject
+        # Update subject when tab is clicked
+        if st.session_state.subject != subject_map[i]:
+            st.session_state.subject = subject_map[i]
             # Clear previous results when switching subject
             st.session_state.exercise = ""
             st.session_state.solution = ""
             st.session_state.clean_steps = ""
-            st.rerun()
+            # No st.rerun() – Streamlit handles the refresh
 
-# If no subject selected (initial load), default to Math
-if "subject" not in st.session_state:
-    st.session_state.subject = "Math"
-
-# Now we render the main solver based on st.session_state.subject
+# Get current subject
 subject = st.session_state.subject
+subject_icons = {"Math": "🧮", "Physics": "⚛️", "Chemistry": "🧪", "English": "📝"}
 
-# ---------- MAIN PAGE ----------
-st.title(f"{subject_icons[subject_keys.index(subject)]} AI {subject} Solver")
+# ---------- MAIN CONTENT ----------
+st.title(f"{subject_icons[subject]} AI {subject} Solver")
 st.caption(t("subtitle"))
 
-# Get the appropriate input label
+# Input label and examples
 input_label = {
     "Math": t("input_label_math"),
     "Physics": t("input_label_physics"),
@@ -310,7 +299,6 @@ input_label = {
     "English": t("input_label_english")
 }[subject]
 
-# Examples
 examples = {
     "Math": t("examples_math"),
     "Physics": t("examples_physics"),
@@ -324,7 +312,7 @@ exercise = st.text_area(input_label, height=120, value=st.session_state.exercise
 # Example buttons
 col_ex1, col_ex2 = st.columns(2)
 with col_ex1:
-    if st.button(f"📌 Example", key="example_btn", help=f"Load an example for {subject}"):
+    if st.button(f"📌 Load Example", key="example_btn", help=f"Load an example for {subject}"):
         example_map = {
             "Math": "3x + 7 = 22",
             "Physics": "A car accelerates from rest at 2 m/s² for 5 seconds. How far does it travel?",
