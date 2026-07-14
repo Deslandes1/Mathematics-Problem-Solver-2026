@@ -281,6 +281,7 @@ subject_tabs = ["🧮 Math", "⚛️ Physics", "🧪 Chemistry", "📝 English"]
 subject_map = {0: "Math", 1: "Physics", 2: "Chemistry", 3: "English"}
 tabs = st.tabs(subject_tabs)
 
+# Loop through tabs – set subject when tab is clicked, but do NOT call st.rerun()
 for i, tab in enumerate(tabs):
     with tab:
         if st.session_state.subject != subject_map[i]:
@@ -289,7 +290,7 @@ for i, tab in enumerate(tabs):
             st.session_state.exercise = ""
             st.session_state.solution = ""
             st.session_state.clean_steps = ""
-            st.rerun()  # Force immediate update of the title and content
+            # No st.rerun() – the page will naturally update
 
 # ---------- GET CURRENT SUBJECT ----------
 subject = st.session_state.subject
