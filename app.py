@@ -93,7 +93,7 @@ LANG = {
         "title_math": "🧮 AI Math Solver",
         "title_physics": "⚛️ AI Physics Solver",
         "title_chemistry": "🧪 AI Chemistry Solver",
-        "title_english": "📝 AI Academic Solver",  # <-- changed from "AI English Solver"
+        "title_english": "📝 AI Academic Solver",
         "subtitle": "Select a subject, enter your problem, and AI will solve it with explanation.",
         "input_label_math": "📝 Type your math exercise here:",
         "input_label_physics": "⚛️ Type your physics problem here:",
@@ -116,7 +116,7 @@ LANG = {
         "title_math": "🧮 Solveur Mathématique IA",
         "title_physics": "⚛️ Solveur Physique IA",
         "title_chemistry": "🧪 Solveur Chimie IA",
-        "title_english": "📝 Solveur Académique IA",  # <-- changed from "Solveur Anglais IA"
+        "title_english": "📝 Solveur Académique IA",
         "subtitle": "Choisissez une matière, entrez votre problème, et l'IA le résoudra avec explication.",
         "input_label_math": "📝 Tapez votre exercice de maths ici :",
         "input_label_physics": "⚛️ Tapez votre problème de physique ici :",
@@ -139,7 +139,7 @@ LANG = {
         "title_math": "🧮 Solucionador Matemático IA",
         "title_physics": "⚛️ Solucionador Física IA",
         "title_chemistry": "🧪 Solucionador Química IA",
-        "title_english": "📝 Solucionador Académico IA",  # <-- changed from "Solucionador Inglés IA"
+        "title_english": "📝 Solucionador Académico IA",
         "subtitle": "Selecciona una materia, ingresa tu problema, y la IA lo resolverá con explicación.",
         "input_label_math": "📝 Escribe tu ejercicio de matemáticas aquí:",
         "input_label_physics": "⚛️ Escribe tu problema de física aquí:",
@@ -276,20 +276,26 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------- SUBJECT SELECTION (TABS) ----------
-subject_tabs = ["🧮 Math", "⚛️ Physics", "🧪 Chemistry", "📝 English"]
-subject_map = {0: "Math", 1: "Physics", 2: "Chemistry", 3: "English"}
-tabs = st.tabs(subject_tabs)
+# ---------- SUBJECT SELECTION (using selectbox instead of tabs) ----------
+# This replaces the broken tabs logic
+subject_options = ["Math", "Physics", "Chemistry", "English"]
+subject_icons = {"Math": "🧮", "Physics": "⚛️", "Chemistry": "🧪", "English": "📝"}
+selected_subject = st.selectbox(
+    "Select Subject",
+    options=subject_options,
+    format_func=lambda x: f"{subject_icons[x]} {x}",
+    index=subject_options.index(st.session_state.subject)
+)
 
-for i, tab in enumerate(tabs):
-    with tab:
-        if st.session_state.subject != subject_map[i]:
-            st.session_state.subject = subject_map[i]
-            st.session_state.exercise = ""
-            st.session_state.solution = ""
-            st.session_state.clean_steps = ""
+# Update subject only if changed
+if selected_subject != st.session_state.subject:
+    st.session_state.subject = selected_subject
+    # Clear previous results when switching subjects
+    st.session_state.exercise = ""
+    st.session_state.solution = ""
+    st.session_state.clean_steps = ""
+    st.rerun()
 
-# ---------- GET CURRENT SUBJECT ----------
 subject = st.session_state.subject
 
 # ---------- DYNAMIC TITLE ----------
@@ -316,7 +322,13 @@ examples_key = {
     "English": "examples_english"
 }[subject]
 
-exercise = st.text_area(t(input_label_key), height=120, value=st.session_state.exercise, key="exercise_input")
+# Use a unique key for the text area to avoid conflicts
+exercise = st.text_area(
+    t(input_label_key),
+    height=120,
+    value=st.session_state.exercise,
+    key="exercise_input"
+)
 
 col_ex1, col_ex2 = st.columns(2)
 with col_ex1:
@@ -338,7 +350,9 @@ with col_ex2:
 col1, col2, col3 = st.columns([1, 1, 4])
 with col1:
     if st.button(t("resolve_btn"), use_container_width=True):
-        if not exercise.strip():
+        # Get the current input from the widget
+        current_exercise = st.session_state.exercise_input
+        if not current_exercise.strip():
             st.warning(t("error_empty"))
         else:
             api_key = st.secrets.get("GROQ_API_KEY")
@@ -527,7 +541,7 @@ with col1:
                         }
                     }[subject][lang]
 
-                    prompt = f"{system_prompt}\n\nProblem: {exercise}\n\nSolution:"
+                    prompt = f"{system_prompt}\n\nProblem: {current_exercise}\n\nSolution:"
                     try:
                         response = client.chat.completions.create(
                             model="llama-3.1-8b-instant",
@@ -559,7 +573,7 @@ with col1:
 
                         st.session_state.solution = explanation
                         st.session_state.clean_steps = clean_steps
-                        st.session_state.exercise = exercise
+                        st.session_state.exercise = current_exercise
                         st.rerun()
                     except Exception as e:
                         st.error(f"AI error: {e}")
@@ -574,7 +588,9 @@ with col2:
 # ---------- DISPLAY BOARD ----------
 st.markdown("---")
 st.subheader(t("board_exercise"))
-st.markdown(f'<div class="board">{exercise if exercise else "📝 Your problem will appear here..."}</div>', unsafe_allow_html=True)
+# Use the current exercise from session state (updated after solve/clear)
+display_exercise = st.session_state.exercise if st.session_state.exercise else "📝 Your problem will appear here..."
+st.markdown(f'<div class="board">{display_exercise}</div>', unsafe_allow_html=True)
 
 # ---------- DISPLAY SOLUTION ----------
 if st.session_state.solution:
